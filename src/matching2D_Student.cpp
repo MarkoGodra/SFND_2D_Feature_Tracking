@@ -171,18 +171,10 @@ void detKeypointsHarris(vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool bVis
 
 void detKeypointsModern(vector<cv::KeyPoint> &keypoints, cv::Mat &img, std::string detectorType, bool bVis)
 {
-    double t;
-
-    if(detectorType.compare("FAST") == 0)
-    {
-        int threshold = 30;
-        bool useNms = true;
-        cv::Ptr<cv::FeatureDetector> detector = cv::FastFeatureDetector::create(threshold, useNms, cv::FastFeatureDetector::TYPE_9_16);
-
-        t = (double)cv::getTickCount();
-        detector->detect(img, keypoints);
-        t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    }
+    cv::Ptr<cv::FeatureDetector> detector = detectorFactory(detectorType);
+    double t = (double)cv::getTickCount();
+    detector->detect(img, keypoints);
+    t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
 
     cout << detectorType << " with n= " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
 
@@ -196,4 +188,44 @@ void detKeypointsModern(vector<cv::KeyPoint> &keypoints, cv::Mat &img, std::stri
         imshow(windowName, visImage);
         cv::waitKey(0);
     }
+}
+
+// FAST, BRISK, ORB, AKAZE, SIFT
+cv::Ptr<cv::FeatureDetector> detectorFactory(const string &detectorType)
+{
+    cv::Ptr<cv::FeatureDetector> detector;
+
+    if (detectorType.compare("FAST") == 0)
+    {
+        int threshold = 30;
+        bool useNms = true;
+        cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16; // TYPE_9_16, TYPE_7_12, TYPE_5_8
+        detector = cv::FastFeatureDetector::create(threshold, useNms, type);
+    }
+    else if (detectorType.compare("BRISK"))
+    {
+        // Has meaningful default values
+        detector = cv::BRISK::create();
+    }
+    else if (detectorType.compare("ORB"))
+    {
+        // Has meaningful default values
+        detector = cv::ORB::create();
+    }
+    else if (detectorType.compare("AKAZE"))
+    {
+        // Has meaningful default values
+        detector = cv::AKAZE::create();
+    }
+    else if (detectorType.compare("SIFT"))
+    {
+        // Has meaningful default values
+        detector = cv::xfeatures2d::SIFT::create();
+    }
+    else
+    {
+        throw std::runtime_error("Invalid detector type");
+    }
+
+    return detector;
 }
