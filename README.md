@@ -37,6 +37,40 @@ Neigh size min:
 Neigh size max:
 Neigh size mean
 
+### MP.1 Data Buffer Optimization:
+This part of project is implemented via `std::vector`, where elements are added via
+`push_back()` and after that, if size exceeds given, one element is deleted from beging via `erase()`
+
+### MP.2 Keypoint Detection
+This is achieved by introducing 
+`void detKeypointsHarris(vector<cv::KeyPoint> &keypoints, cv::Mat &img, double& duration, bool bVis)` used for Harris
+detector. Selection of modern detectors is implemented via
+`cv::Ptr<cv::FeatureDetector> detectorFactory(const std::string& detectorType);`. This is used in combination with
+`void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std::string detectorType, double& duration, bool bVis=false);`.
+
+### MP.3 Keypoint Removal
+
+Functionality is achieved by utilizing `contains()` function of predefined `cv::Rect`. All points that are outside of
+region of interest (rect) are filtered out.
+
+### MP.4 Keypoint Descriptors
+
+Functionality is implemented via introducing selector function
+`cv::Ptr<cv::DescriptorExtractor> extractorFactory(const string &descriptorType)`. Descriptor type is passed to it,
+and instance of appropriate descriptor extractor is returned. This is used in combination with 
+`void descKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descriptors, std::string descriptorType, double& descDuration);`
+
+### MP.5 Descriptor Matching
+
+Instance of FLANN matcher is created via `cv::DescriptorMatcher::create()`. Before passing descriptor matrices to FLANN matcher
+their type has to be changed to CV_32F (bug in opencv 4.1)
+
+
+### MP.6 Descriptor Distance Ratio
+
+KNN selector was implemented where `cv::knnMatch()` was used. After acquiring KNN matches, all of these are checked and
+are only kept if ratio of best vs. second-best match was appropriate. All other matches were discarded.
+
 ### MP.7 Detector stats:
 Overview on each of the evaluated detector and it's performance on total ammount of keypoint detections in region of 
 interest (preceeding vehicle).
