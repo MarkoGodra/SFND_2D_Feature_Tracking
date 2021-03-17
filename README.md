@@ -50,3 +50,53 @@ interest (preceeding vehicle).
 | ORB | 254 | 297 | 8.4 | 72 | 21.9444 |
 | AKAZE | 254 | 297 | 8.4 | 72 | 21.9444 |
 | SIFT | 254 | 297 | 8.4 | 72 | 21.9444 |
+
+### MP.8 Matches stats:
+Total matches on tested detector/descriptor pairs, where brute force matching
+is used with KNN selector and descriptor distance ratio of 0.8. Region of interest
+is reduced, and only features on preceding care are taken into account.
+
+| Det / Desc | Min Matches | Max Matches | Average Matches |
+| ---------- | ----------- | ----------- | --------------- |
+| SHITOMASI / BRISK | 79 | 95 | 85.2222 |
+| SHITOMASI / BRIEF | 100 | 115 | 104.889 |
+| SHITOMASI / ORB | 97 | 106 | 100.889 |
+| SHITOMASI / FREAK | 80 | 90 | 85.3333 |
+| SHITOMASI / AKAZE | N/A | N/A | N/A |
+| SHITOMASI / SIFT | 96 | 112 | 103 |
+| HARRIS / BRISK | 10 | 23 | 15.7778 |
+| HARRIS / BRIEF | 11 | 26 | 19.2222 |
+| HARRIS / ORB | 12 | 24 | 18 |
+| HARRIS / FREAK | 12 | 21 | 16 |
+| HARRIS / AKAZE | N/A | N/A | N/A |
+| HARRIS / SIFT | 11 | 24 | 18.1111 |
+| FAST / BRISK | 85 | 107 | 99.8889 |
+| FAST / BRIEF | 108 | 131 | 122.111 |
+| FAST / ORB | 106 | 126 | 119 |
+| FAST / FREAK | 85 | 105 | 97.5556 |
+| FAST / AKAZE | N/A | N/A | N/A |
+| FAST / SIFT | 103 | 123 | 116.222 |
+| BRISK / BRISK | 73 | 92 | 83.4444 |
+| BRISK / BRIEF | 43 | 84 | 60.5556 |
+| BRISK / ORB | 67 | 101 | 84.7778 |
+| BRISK / FREAK | 36 | 56 | 46.6667 |
+| BRISK / AKAZE | N/A | N/A | N/A |
+| BRISK / SIFT | 67 | 95 | 84.7778 |
+| ORB / BRISK | 157 | 188 | 174.444 |
+| ORB / BRIEF | 178 | 207 | 189.333 |
+| ORB / ORB | 158 | 182 | 168.222 |
+| ORB / FREAK | 155 | 183 | 169.333 |
+| ORB / AKAZE | N/A | N/A | N/A |
+| ORB / SIFT | 169 | 195 | 182.889 |
+| AKAZE / BRISK | 157 | 188 | 174.444 |
+| AKAZE / BRIEF | 178 | 207 | 189.333 |
+| AKAZE / ORB | 158 | 182 | 168.222 |
+| AKAZE / FREAK | 155 | 183 | 169.333 |
+| AKAZE / AKAZE | N/A | N/A | N/A |
+| AKAZE / SIFT | 169 | 195 | 182.889 |
+| SIFT / BRISK | 157 | 188 | 174.444 |
+| SIFT / BRIEF | 178 | 207 | 189.333 |
+| SIFT / ORB | N/A | N/A | N/A |
+| SIFT / FREAK | 155 | 183 | 169.333 |
+| SIFT / AKAZE | N/A | N/A | N/A |
+| SIFT / SIFT | 169 | 195 | 182.889 |

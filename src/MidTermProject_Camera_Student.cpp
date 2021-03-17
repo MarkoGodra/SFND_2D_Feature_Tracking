@@ -239,6 +239,38 @@ void printNA(const std::string &detector, const std::string &descriptor)
               << " |" << std::endl;
 }
 
+std::vector<std::string> getCompatibleDescType(const std::string &descriptor)
+{
+    if (descriptor == "BRISK")
+    {
+        return {"DES_BINARY", "DES_HOG"};
+    }
+    else if (descriptor == "BRIEF")
+    {
+        return {"DES_BINARY", "DES_HOG"};
+    }
+    else if (descriptor == "ORB")
+    {
+        return {"DES_BINARY", "DES_HOG"};
+    }
+    else if (descriptor == "FREAK")
+    {
+        return {"DES_BINARY", "DES_HOG"};
+    }
+    else if (descriptor == "AKAZE")
+    {
+        return {"DES_BINARY", "DES_HOG"};
+    }
+    else if (descriptor == "SIFT")
+    {
+        return {"DES_HOG"};
+    }
+    else
+    {
+        return {};
+    }
+}
+
 std::vector<std::string> detectors = {"SHITOMASI", "HARRIS", "FAST", "BRISK", "ORB", "AKAZE", "SIFT"};
 std::vector<std::string> descriptors = {"BRISK", "BRIEF", "ORB", "FREAK", "AKAZE", "SIFT"};
 
@@ -256,11 +288,6 @@ void measurementRoutine()
     int imgEndIndex = 9;   // last file index to load
     int imgFillWidth = 4;  // no. of digits which make up the file index (e.g. img-0001.png)
 
-    // misc
-    int dataBufferSize = 2;       // no. of images which are held in memory (ring buffer) at the same time
-    vector<DataFrame> dataBuffer; // list of data frames which are held in memory at the same time
-    bool bVis = false;            // visualize results
-
     for (const auto& detector : detectors)
     {
         string detectorType = detector; // -> SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
@@ -272,12 +299,21 @@ void measurementRoutine()
         {
             string descriptorType = descriptor; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
 
-            std::cout << "Trying " << detectorType << " + " << descriptorType << std::endl;
-            string descriptorTypeBin = "DES_BINARY"; // DES_BINARY, DES_HOG
+            // Don't allow cases that result in assert to be ran
+            if (descriptorType == "AKAZE" || (descriptorType == "ORB" && detectorType == "SIFT"))
+            {
+                printNA(detectorType, descriptorType);
+                continue;
+            }
+
+            string descriptorTypeBin = getCompatibleDescType(descriptorType)[0]; // DES_BINARY, DES_HOG
 
             std::vector<std::vector<cv::KeyPoint>> keypointsDetections;
             std::vector<float> neighborSizes;
             std::vector<int> numOfMatches;
+            int dataBufferSize = 2;       // no. of images which are held in memory (ring buffer) at the same time
+            vector<DataFrame> dataBuffer; // list of data frames which are held in memory at the same time
+            bool bVis = false;            // visualize results
 
             for (size_t imgIndex = 0; imgIndex <= imgEndIndex - imgStartIndex; imgIndex++)
             {
@@ -317,6 +353,7 @@ void measurementRoutine()
                     detKeypointsModern(keypoints, imgGray, detectorType, bVis);
                 }
 
+                // Focus on preceding car
                 cv::Rect vehicleRect(535, 180, 180, 150);
                 keypoints.erase(
                         std::remove_if(keypoints.begin(), keypoints.end(), [&vehicleRect](const cv::KeyPoint &keypoint)
