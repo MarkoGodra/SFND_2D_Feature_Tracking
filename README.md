@@ -101,7 +101,9 @@ is reduced, and only features on preceding car are taken into account.
 | SIFT / AKAZE | N/A | N/A | N/A |
 | SIFT / SIFT | 169 | 195 | 182.889 |
 
-#### Table with regards of detection/descriptor extraction times
+### MP.9 Timings / total scores
+
+Table with regards of detection/descriptor extraction times
 
 | Det / Desc | Min Matches | Max Matches | Average Matches | Avg. Detection Time | Avg. Desc. Extraction Time | Total Time | Total score |
 | ---------- | ----------- | ----------- | --------------- | ------------------- | -------------------------- | ---------- | ----------- |
@@ -140,9 +142,8 @@ is reduced, and only features on preceding car are taken into account.
 | SIFT / FREAK | 155 | 183 | 169.333 | 33.0492 ms | 36.6645 ms | 69.7137 ms | 2.42898 |
 | SIFT / SIFT | 169 | 195 | 182.889 | 33.1263 ms | 28.9877 ms | 62.114 ms | 2.94441 |
 
-
-##Top 3 det / desc pairs:
-
+---
+#### Top 3 det / desc pairs:
 Score by which different combinations of detectors and descriptors is calculated by following formula:
 
 score = AM / AT
