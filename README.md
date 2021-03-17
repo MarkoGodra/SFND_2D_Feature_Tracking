@@ -54,7 +54,7 @@ interest (preceeding vehicle).
 ### MP.8 Matches stats:
 Total matches on tested detector/descriptor pairs, where brute force matching
 is used with KNN selector and descriptor distance ratio of 0.8. Region of interest
-is reduced, and only features on preceding care are taken into account.
+is reduced, and only features on preceding car are taken into account.
 
 | Det / Desc | Min Matches | Max Matches | Average Matches |
 | ---------- | ----------- | ----------- | --------------- |
