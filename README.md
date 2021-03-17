@@ -100,3 +100,62 @@ is reduced, and only features on preceding car are taken into account.
 | SIFT / FREAK | 155 | 183 | 169.333 |
 | SIFT / AKAZE | N/A | N/A | N/A |
 | SIFT / SIFT | 169 | 195 | 182.889 |
+
+#### Table with regards of detection/descriptor extraction times
+
+| Det / Desc | Min Matches | Max Matches | Average Matches | Avg. Detection Time | Avg. Desc. Extraction Time | Total Time | Total score |
+| ---------- | ----------- | ----------- | --------------- | ------------------- | -------------------------- | ---------- | ----------- |
+| SHITOMASI / BRISK | 79 | 95 | 85.2222 | 18.4819 ms | 2.16979 ms | 20.6517 ms | 4.12665 |
+| SHITOMASI / BRIEF | 100 | 115 | 104.889 | 19.5499 ms | 1.35555 ms | 20.9054 ms | 5.0173 |
+| SHITOMASI / ORB | 97 | 106 | 100.889 | 18.6833 ms | 1.08865 ms | 19.7719 ms | 5.10263 |
+| SHITOMASI / FREAK | 80 | 90 | 85.3333 | 10.6279 ms | 36.0039 ms | 46.6318 ms | 1.82994 |
+| SHITOMASI / SIFT | 96 | 112 | 103 | 10.4349 ms | 11.7574 ms | 22.1924 ms | 4.64124 |
+| HARRIS / BRISK | 10 | 23 | 15.7778 | 11.5331 ms | 0.533341 ms | 12.0664 ms | 1.30758 |
+| HARRIS / BRIEF | 11 | 26 | 19.2222 | 11.2255 ms | 0.297754 ms | 11.5232 ms | 1.66813 |
+| HARRIS / ORB | 12 | 24 | 18 | 11.3132 ms | 0.580918 ms | 11.8941 ms | 1.51336 |
+| HARRIS / FREAK | 12 | 21 | 16 | 11.3149 ms | 35.0574 ms | 46.3723 ms | 0.345033 |
+| HARRIS / SIFT | 11 | 24 | 18.1111 | 11.3519 ms | 10.4039 ms | 21.7558 ms | 0.832473 |
+| FAST / BRISK | 85 | 107 | 99.8889 | 0.916347 ms | 1.5269 ms | 2.44325 ms | 40.8836 |
+| FAST / BRIEF | 108 | 131 | 122.111 | 0.934625 ms | 0.63872 ms | 1.57334 ms | 77.6124 |
+| FAST / ORB | 106 | 126 | 119 | 0.909289 ms | 0.721501 ms | 1.63079 ms | 72.9708 |
+| FAST / FREAK | 85 | 105 | 97.5556 | 0.909774 ms | 36.003 ms | 36.9128 ms | 2.64287 |
+| FAST / SIFT | 103 | 123 | 116.222 | 0.915371 ms | 14.3418 ms | 15.2571 ms | 7.61757 |
+| BRISK / BRISK | 73 | 92 | 83.4444 | 11.0821 ms | 1.29526 ms | 12.3773 ms | 6.74171 |
+| BRISK / BRIEF | 43 | 84 | 60.5556 | 5.75147 ms | 0.462515 ms | 6.21398 ms | 9.74505 |
+| BRISK / ORB | 67 | 101 | 84.7778 | 5.80198 ms | 3.52125 ms | 9.32322 ms | 9.09318 |
+| BRISK / FREAK | 36 | 56 | 46.6667 | 5.76497 ms | 35.605 ms | 41.37 ms | 1.12803 |
+| BRISK / SIFT | 67 | 95 | 84.7778 | 5.83441 ms | 33.5454 ms | 39.3798 ms | 2.15282 |
+| ORB / BRISK | 157 | 188 | 174.444 | 33.2073 ms | 2.62672 ms | 35.834 ms | 4.86813 |
+| ORB / BRIEF | 178 | 207 | 189.333 | 33.0152 ms | 0.871132 ms | 33.8863 ms | 5.58731 |
+| ORB / ORB | 158 | 182 | 168.222 | 33.0004 ms | 3.63592 ms | 36.6363 ms | 4.59168 |
+| ORB / FREAK | 155 | 183 | 169.333 | 33.0404 ms | 36.727 ms | 69.7674 ms | 2.42711 |
+| ORB / SIFT | 169 | 195 | 182.889 | 32.9948 ms | 28.8524 ms | 61.8472 ms | 2.95711 |
+| AKAZE / BRISK | 157 | 188 | 174.444 | 32.9491 ms | 2.60237 ms | 35.5515 ms | 4.90681 |
+| AKAZE / BRIEF | 178 | 207 | 189.333 | 32.9899 ms | 0.885498 ms | 33.8754 ms | 5.58911 |
+| AKAZE / ORB | 158 | 182 | 168.222 | 32.9446 ms | 3.51744 ms | 36.4621 ms | 4.61362 |
+| AKAZE / FREAK | 155 | 183 | 169.333 | 32.9955 ms | 36.5895 ms | 69.585 ms | 2.43347 |
+| AKAZE / SIFT | 169 | 195 | 182.889 | 32.9256 ms | 28.8436 ms | 61.7692 ms | 2.96084 |
+| SIFT / BRISK | 157 | 188 | 174.444 | 33.0443 ms | 2.62374 ms | 35.6681 ms | 4.89077 |
+| SIFT / BRIEF | 178 | 207 | 189.333 | 33.3744 ms | 0.875252 ms | 34.2496 ms | 5.52804 |
+| SIFT / FREAK | 155 | 183 | 169.333 | 33.0492 ms | 36.6645 ms | 69.7137 ms | 2.42898 |
+| SIFT / SIFT | 169 | 195 | 182.889 | 33.1263 ms | 28.9877 ms | 62.114 ms | 2.94441 |
+
+
+##Top 3 det / desc pairs:
+
+Score by which different combinations of detectors and descriptors is calculated by following formula:
+
+score = AM / AT
+
+AM - Average Matches on 10 test images
+AT - Average total time, detection + descriptor extraction on 10 test images
+
+| Det / Desc | Average Matches | Avg. Det. Time | Avg. Desc. Extraction Time | Avg. Total Time | Total Score (Matches/ms) |
+| ---------- | --------------- | -------------- | -------------------------- | --------------- | ------------------------ |
+| FAST / BRIEF | 122.111 | 0.934625 ms | 0.63872 ms | 1.57334 ms | 77.6124
+| FAST / ORB | 119 | 0.909289 ms | 0.721501 ms | 1.63079 ms | 72.9708
+| FAST / BRISK | 99.8889 | 0.916347 ms | 1.5269 ms | 2.44325 ms | 40.8836
+
+After taking look at statistics, it is also important to note that all combinations have
+fair amount of false detections. FAST + BRIEF seems to be best candidate, as it seems that it has smallest amount
+of false positives (conclusion based on visual observations).

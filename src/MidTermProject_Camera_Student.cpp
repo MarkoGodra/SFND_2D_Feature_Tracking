@@ -80,17 +80,18 @@ void debugRoutine()
         //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
         //// -> HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
 
+        double duration = 0.0;
         if (detectorType.compare("SHITOMASI") == 0)
         {
-            detKeypointsShiTomasi(keypoints, imgGray, false);
+            detKeypointsShiTomasi(keypoints, imgGray, duration, false);
         }
         else if (detectorType.compare("HARRIS") == 0)
         {
-            detKeypointsHarris(keypoints, imgGray, false);
+            detKeypointsHarris(keypoints, imgGray, duration, false);
         }
         else
         {
-            detKeypointsModern(keypoints, imgGray, detectorType, bVis);
+            detKeypointsModern(keypoints, imgGray, detectorType, duration, bVis);
         }
 
         //// EOF STUDENT ASSIGNMENT
@@ -138,7 +139,8 @@ void debugRoutine()
 
         cv::Mat descriptors;
         string descriptorType = "FREAK"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
-        descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
+        double descDuration = 0.0;
+        descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType, descDuration);
         //// EOF STUDENT ASSIGNMENT
 
         // push descriptors for current frame to end of data buffer
@@ -239,6 +241,53 @@ void printNA(const std::string &detector, const std::string &descriptor)
               << " |" << std::endl;
 }
 
+struct StatHolder
+{
+    std::string detector;
+    std::string descriptor;
+    double averageDetTime;
+    double averageDescTime;
+    double averageMatches;
+    double totalScore;
+};
+
+void prepareM9StatsRanking(const std::string &detector, const std::string &descriptor, std::vector<int> &totalMatches,
+                  std::vector<double> &detTimes, std::vector<double> &descTimes, std::vector<StatHolder>& records)
+{
+    std::sort(totalMatches.begin(), totalMatches.end());
+    std::sort(detTimes.begin(), detTimes.end());
+    std::sort(descTimes.begin(), descTimes.end());
+
+    double averageDetTime = ((double) std::accumulate(detTimes.begin(), detTimes.end(), 0.0)) / detTimes.size();
+    double averageDescTime = ((double) std::accumulate(descTimes.begin(), descTimes.end(), 0.0)) / descTimes.size();
+    double averageMatches = ((double) std::accumulate(totalMatches.begin(), totalMatches.end(), 0.0)) / totalMatches.size();
+
+    records.push_back({detector, descriptor, averageDetTime, averageDescTime, averageMatches, averageMatches / (averageDescTime + averageDetTime)});
+}
+
+void printM9Stats(const std::string &detector, const std::string &descriptor, std::vector<int> &totalMatches,
+                  std::vector<double> &detTimes, std::vector<double> &descTimes)
+{
+    std::sort(totalMatches.begin(), totalMatches.end());
+    std::sort(detTimes.begin(), detTimes.end());
+    std::sort(descTimes.begin(), descTimes.end());
+
+    double averageDetTime = ((double) std::accumulate(detTimes.begin(), detTimes.end(), 0.0)) / detTimes.size();
+    double averageDescTime = ((double) std::accumulate(descTimes.begin(), descTimes.end(), 0.0)) / descTimes.size();
+    double averageMatches = ((double) std::accumulate(totalMatches.begin(), totalMatches.end(), 0.0)) / totalMatches.size();
+
+    std::cout << "| " << detector << " / " << descriptor
+              << " | " << totalMatches[0]
+              << " | " << totalMatches[totalMatches.size() - 1]
+              << " | " << averageMatches
+              << " | " << averageDetTime << " ms"
+              << " | " << averageDescTime << " ms"
+              << " | " << averageDetTime + averageDescTime << " ms"
+              << " | " << averageMatches / (averageDescTime + averageDetTime) // Total score avg matches / avg time
+              << " |" << std::endl;
+}
+
+
 std::vector<std::string> getCompatibleDescType(const std::string &descriptor)
 {
     if (descriptor == "BRISK")
@@ -277,7 +326,9 @@ std::vector<std::string> descriptors = {"BRISK", "BRIEF", "ORB", "FREAK", "AKAZE
 void measurementRoutine()
 {
     bool printM7StatsFlag = false;
-    bool printM8StatsFlag = true;
+    bool printM8StatsFlag = false;
+    bool printM9StatsFlag = true;
+    std::vector<StatHolder> records;
     string dataPath = "../";
 
     // camera
@@ -302,7 +353,10 @@ void measurementRoutine()
             // Don't allow cases that result in assert to be ran
             if (descriptorType == "AKAZE" || (descriptorType == "ORB" && detectorType == "SIFT"))
             {
-                printNA(detectorType, descriptorType);
+                if(printM8StatsFlag)
+                {
+                    printNA(detectorType, descriptorType);
+                }
                 continue;
             }
 
@@ -311,6 +365,9 @@ void measurementRoutine()
             std::vector<std::vector<cv::KeyPoint>> keypointsDetections;
             std::vector<float> neighborSizes;
             std::vector<int> numOfMatches;
+            std::vector<double> detectionTimes;
+            std::vector<double> descTimes;
+
             int dataBufferSize = 2;       // no. of images which are held in memory (ring buffer) at the same time
             vector<DataFrame> dataBuffer; // list of data frames which are held in memory at the same time
             bool bVis = false;            // visualize results
@@ -339,19 +396,22 @@ void measurementRoutine()
 
                 // extract 2D keypoints from current image
                 vector<cv::KeyPoint> keypoints; // create empty feature list for current image
+                double detectionTime = 0.0;
 
                 if (detectorType.compare("SHITOMASI") == 0)
                 {
-                    detKeypointsShiTomasi(keypoints, imgGray, false);
+                    detKeypointsShiTomasi(keypoints, imgGray, detectionTime);
                 }
                 else if (detectorType.compare("HARRIS") == 0)
                 {
-                    detKeypointsHarris(keypoints, imgGray, false);
+                    detKeypointsHarris(keypoints, imgGray, detectionTime);
                 }
                 else
                 {
-                    detKeypointsModern(keypoints, imgGray, detectorType, bVis);
+                    detKeypointsModern(keypoints, imgGray, detectorType, detectionTime);
                 }
+
+                detectionTimes.push_back(detectionTime);
 
                 // Focus on preceding car
                 cv::Rect vehicleRect(535, 180, 180, 150);
@@ -375,7 +435,9 @@ void measurementRoutine()
                 }
 
                 cv::Mat descriptors;
-                descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
+                double descTime = 0.0;
+                descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType, descTime);
+                descTimes.push_back(descTime);
 
                 // push descriptors for current frame to end of data buffer
                 (dataBuffer.end() - 1)->descriptors = descriptors;
@@ -404,6 +466,34 @@ void measurementRoutine()
             if(printM8StatsFlag)
             {
                 printM8Stats(detectorType, descriptorType, numOfMatches);
+            }
+
+            if(printM9StatsFlag)
+            {
+                printM9Stats(detectorType, descriptorType, numOfMatches, detectionTimes, descTimes);
+                prepareM9StatsRanking(detectorType, descriptorType, numOfMatches, detectionTimes, descTimes, records);
+            }
+        }
+    }
+
+    if(printM9StatsFlag)
+    {
+        std::cout << "======================= TOP 3 ================================" << std::endl;
+        std::sort(records.begin(), records.end(), [](const StatHolder& lhs, const StatHolder& rhs){
+            return lhs.totalScore > rhs.totalScore;
+        });
+
+        if(records.size() > 0)
+        {
+            for(auto i = 0; i < 3; i++)
+            {
+                std::cout << "| " << records[i].detector << " / " << records[i].descriptor
+                          << " | " << records[i].averageMatches
+                          << " | " << records[i].averageDetTime << " ms"
+                          << " | " << records[i].averageDescTime << " ms"
+                          << " | " << records[i].averageDetTime + records[i].averageDescTime << " ms"
+                          << " | " << records[i].totalScore // Total score avg matches / avg time
+                          << std::endl;
             }
         }
     }
