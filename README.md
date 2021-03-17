@@ -32,3 +32,21 @@ See the classroom instruction and code comments for more details on each of thes
 2. Make a build directory in the top level directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
 4. Run it: `./2D_feature_tracking`.
+
+Neigh size min:
+Neigh size max:
+Neigh size mean
+
+### MP.7 Detector stats:
+Overview on each of the evaluated detector and it's performance on total ammount of keypoint detections in region of 
+interest (preceeding vehicle).
+
+| Detector | Min Keypoints | Max Keypoints | Neighborhood size min | Neighborhood size max | Neighborhood size mean |
+| -------- | ------------- | ------------- | --------------------- | --------------------- | ---------------------- |
+| SHITOMASI | 111 | 125 | 4 | 4 | 4 |
+| HARRIS | 14 | 43 | 6 | 6 | 6 |
+| FAST | 138 | 156 | 7 | 7 | 7 |
+| BRISK | 92 | 130 | 31 | 111.079 | 55.9928 |
+| ORB | 254 | 297 | 8.4 | 72 | 21.9444 |
+| AKAZE | 254 | 297 | 8.4 | 72 | 21.9444 |
+| SIFT | 254 | 297 | 8.4 | 72 | 21.9444 |

@@ -18,10 +18,8 @@
 
 using namespace std;
 
-/* MAIN PROGRAM */
-int main(int argc, const char *argv[])
+void debugRoutine()
 {
-
     /* INIT VARIABLES AND DATA STRUCTURES */
 
     // data location
@@ -194,6 +192,168 @@ int main(int argc, const char *argv[])
         }
 
     } // eof loop over all images
+}
+
+void printStats(const std::string& detectorType, std::vector<std::vector<cv::KeyPoint>>& detections, std::vector<float> neighSizes)
+{
+    std::sort(detections.begin(), detections.end(),
+              [](const std::vector<cv::KeyPoint> &rhs, const std::vector<cv::KeyPoint> &lhs)
+              {
+                  return lhs.size() > rhs.size();
+              });
+
+    std::sort(neighSizes.begin(), neighSizes.end());
+
+    float meanSize = std::accumulate(neighSizes.begin(), neighSizes.end(), 0.0, [](float sum, float size)
+    {
+        return sum + size;
+    }) / neighSizes.size();
+
+    std::ostringstream os;
+//    os << "| " << detectorType << " | ";
+//    os << "Min detections:" << detections[0].size() << std::endl;
+//    os << "Max detections:" << detections[detections.size() - 1].size() << std::endl;
+//    os << "Neigh size min:" << neighSizes[0] << std::endl;
+//    os << "Neigh size max:" << neighSizes[neighSizes.size() - 1] << std::endl;
+//    os << "Neigh size mean:" << meanSize << std::endl;
+
+    os << "| " << detectorType << " | " << detections[0].size()
+        << " | " << detections[detections.size() - 1].size()
+        << " | " <<  neighSizes[0]
+        << " | " << neighSizes[neighSizes.size() - 1]
+        << " | " << meanSize << " |";
+
+    std::cout << os.str() << std::endl;
+}
+
+std::vector<std::string> detectors = {"SHITOMASI", "HARRIS", "FAST", "BRISK", "ORB", "AKAZE", "SIFT"};
+
+void measurementRoutine()
+{
+    string dataPath = "../";
+
+    // camera
+    string imgBasePath = dataPath + "images/";
+    string imgPrefix = "KITTI/2011_09_26/image_00/data/000000"; // left camera, color
+    string imgFileType = ".png";
+    int imgStartIndex = 0; // first file index to load (assumes Lidar and camera names have identical naming convention)
+    int imgEndIndex = 9;   // last file index to load
+    int imgFillWidth = 4;  // no. of digits which make up the file index (e.g. img-0001.png)
+
+    // misc
+    int dataBufferSize = 2;       // no. of images which are held in memory (ring buffer) at the same time
+    vector<DataFrame> dataBuffer; // list of data frames which are held in memory at the same time
+    bool bVis = false;            // visualize results
+
+    for (const auto& detector : detectors)
+    {
+        string detectorType = detector; // -> SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
+        string descriptorType = "FREAK"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
+        string matcherType = "MAT_FLANN";     // MAT_BF, MAT_FLANN
+        string descriptorTypeBin = "DES_BINARY"; // DES_BINARY, DES_HOG
+        string selectorType = "SEL_KNN";       // SEL_NN, SEL_KNN
+
+        std::vector<std::vector<cv::KeyPoint>> keypointsDetections;
+        std::vector<float> neighborSizes;
+//        std::vector<float> neighborSizeMin;
+//        std::vector<float> neighborSizeMax;
+//        std::vector<float> neighborSizeMean;
+
+        for (size_t imgIndex = 0; imgIndex <= imgEndIndex - imgStartIndex; imgIndex++)
+        {
+            // assemble filenames for current index
+            ostringstream imgNumber;
+            imgNumber << setfill('0') << setw(imgFillWidth) << imgStartIndex + imgIndex;
+            string imgFullFilename = imgBasePath + imgPrefix + imgNumber.str() + imgFileType;
+
+            // load image from file and convert to grayscale
+            cv::Mat img, imgGray;
+            img = cv::imread(imgFullFilename);
+            cv::cvtColor(img, imgGray, cv::COLOR_BGR2GRAY);
+
+            // push image into data frame buffer
+            DataFrame frame;
+            frame.cameraImg = imgGray;
+            dataBuffer.push_back(frame);
+            if(dataBuffer.size() > dataBufferSize)
+            {
+                // Don't allow vector to grow past defined size
+                dataBuffer.erase(dataBuffer.begin());
+            }
+
+            // extract 2D keypoints from current image
+            vector<cv::KeyPoint> keypoints; // create empty feature list for current image
+
+            if (detectorType.compare("SHITOMASI") == 0)
+            {
+                detKeypointsShiTomasi(keypoints, imgGray, false);
+            }
+            else if (detectorType.compare("HARRIS") == 0)
+            {
+                detKeypointsHarris(keypoints, imgGray, false);
+            }
+            else
+            {
+                detKeypointsModern(keypoints, imgGray, detectorType, bVis);
+            }
+
+            cv::Rect vehicleRect(535, 180, 180, 150);
+            keypoints.erase(
+                    std::remove_if(keypoints.begin(), keypoints.end(), [&vehicleRect](const cv::KeyPoint &keypoint)
+                    {
+                        return !vehicleRect.contains(keypoint.pt);
+                    }), keypoints.end());
+
+            // push keypoints and descriptor for current frame to end of data buffer
+            (dataBuffer.end() - 1)->keypoints = keypoints;
+
+            keypointsDetections.push_back(keypoints);
+            std::sort(keypoints.begin(), keypoints.end(), [](const cv::KeyPoint& lhs, const cv::KeyPoint& rhs){
+                return lhs.size < rhs.size;
+            });
+
+            for(const auto& keypoint : keypoints)
+            {
+                neighborSizes.push_back(keypoint.size);
+            }
+
+            cv::Mat descriptors;
+            descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
+
+            // push descriptors for current frame to end of data buffer
+            (dataBuffer.end() - 1)->descriptors = descriptors;
+
+            if (dataBuffer.size() > 1) // wait until at least two images have been processed
+            {
+                vector<cv::DMatch> matches;
+
+                matchDescriptors((dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints,
+                                 (dataBuffer.end() - 2)->descriptors, (dataBuffer.end() - 1)->descriptors,
+                                 matches, descriptorTypeBin, matcherType, selectorType);
+
+                // store matches in current data frame
+                (dataBuffer.end() - 1)->kptMatches = matches;
+            }
+
+        } // eof loop over all images
+
+        printStats(detectorType, keypointsDetections, neighborSizes);
+    }
+}
+
+/* MAIN PROGRAM */
+int main(int argc, const char *argv[])
+{
+    bool measure = true;
+
+    if(!measure)
+    {
+        debugRoutine();
+    }
+    else
+    {
+        measurementRoutine();
+    }
 
     return 0;
 }
