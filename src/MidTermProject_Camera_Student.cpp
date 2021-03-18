@@ -12,6 +12,7 @@
 #include <opencv2/features2d.hpp>
 #include <opencv2/xfeatures2d.hpp>
 #include <opencv2/xfeatures2d/nonfree.hpp>
+#include <numeric>
 
 #include "dataStructures.h"
 #include "matching2D.hpp"
